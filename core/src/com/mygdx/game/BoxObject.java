@@ -48,11 +48,11 @@ public class BoxObject extends CollidableObject {
   }
 
   public void calculateMovement(int width, int height, List<CollidableObject> objects) {
-    //if (endCoords.x >= width || startCoords.x <= 0) {
-    //  movement = new Vector2(-movement.x, movement.y);
-    //}
-    //if (endCoords.y >= height || startCoords.y <= 0)
-    //  movement = new Vector2(movement.x, -movement.y);
+    if (endCoords.x >= width || startCoords.x <= 0) {
+      movement = new Vector2(-movement.x, movement.y);
+    }
+    if (endCoords.y >= height || startCoords.y <= 0)
+      movement = new Vector2(movement.x, -movement.y);
 
     for(CollidableObject collidableObject: objects)
     {
@@ -60,29 +60,15 @@ public class BoxObject extends CollidableObject {
       {
         continue;
       }
-      else
-      {
-        if(startCoords.x<= collidableObject.endCoords.x && startCoords.x >= collidableObject.startCoords.x)
-        {
-          movement = new Vector2(-movement.x, movement.y);
-          break;
-        }
-        if(endCoords.x >= collidableObject.startCoords.x && endCoords.x <=collidableObject.endCoords.x)
-        {
-          movement = new Vector2(-movement.x, movement.y);
-          break;
-        }
-        if(startCoords.y <= collidableObject.endCoords.y  && startCoords.y >= collidableObject.startCoords.y)
-        {
-          movement = new Vector2(movement.x, -movement.y);
-          break;
-        }
-        if(endCoords.y >= collidableObject.startCoords.y && endCoords.y <= collidableObject.endCoords.y)
-        {
-          movement = new Vector2(movement.x, -movement.y);
-          break;
-        }
-      }
+      //else
+      //{
+      //  if(startCoords.x<= collidableObject.endCoords.x || endCoords.x >= collidableObject.startCoords.x)
+      //  {
+      //    movement = new Vector2(-movement.x, movement.y);
+      //  }
+      //  if(startCoords.y <= collidableObject.endCoords.y || endCoords.y >= collidableObject.startCoords.y)
+      //
+      //}
     }
 
     setSpritePosition();
