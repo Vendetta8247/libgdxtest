@@ -13,87 +13,87 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.Box;
 
 public class MyGdxGame extends ApplicationAdapter {
-    SpriteBatch batch;
-    Texture img;
-    BoxObject box;
-    List<BoxObject> objects;
-    float delta = 10;
-    Operation opX = Operation.plus, opY = Operation.plus;
+  SpriteBatch batch;
+  Texture img;
+  BoxObject box;
+  List<CollidableObject> objects;
+  int width;
+  int height;
 
-    Vector2 touchCoords = new Vector2(0, 0);
+  Vector2 touchCoords = new Vector2(0, 0);
 
-    enum Operation {
-        plus, minus
-    }
+  @Override public void create() {
+    batch = new SpriteBatch();
+    width = Gdx.graphics.getWidth();
+    height = Gdx.graphics.getHeight();
+    img = new Texture("badlogic.jpg");
+    box = new BoxObject(new Vector2(0, 0), img, new Vector2(10, 10), width, height);
+    box.setSpriteSize(img.getWidth(), img.getHeight());
+    objects = new ArrayList<>();
+    objects.add(box);
+    objects.add(new CollidableObject(new Vector2(-50, -50), new Vector2(-1, height + 50)));
+    objects.add(
+        new CollidableObject(new Vector2(-50, height + 50), new Vector2(width + 50, height +1)));
+    objects.add(new CollidableObject(new Vector2(width + 50, height + 50), new Vector2(width -1, -50)));
+    objects.add(new CollidableObject(new Vector2(width+50, -50), new Vector2(-50, - 50)));
+    Gdx.input.setInputProcessor(new InputAdapter() {
+      @Override public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
-    @Override
-    public void create() {
-        batch = new SpriteBatch();
-        img = new Texture("badlogic.jpg");
-        box = new BoxObject(new Vector2(0, 0), img);
-        box.setSpriteSize(img.getWidth(), img.getHeight());
-        objects = new ArrayList<>();
-        objects.add(box);
-        Gdx.input.setInputProcessor(new InputAdapter() {
-            @Override
-            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                System.out.println("Touch " + screenX + ":" + (Gdx.graphics.getHeight() - screenY) + " " + pointer + " " + button);
-                touchCoords = new Vector2(screenX, Gdx.graphics.getHeight() - screenY);
-                return true;
-            }
-        });
-    }
-
-    @Override
-    public void render() {
-        int width = Gdx.graphics.getWidth();
-        int height = Gdx.graphics.getHeight();
+        touchCoords = new Vector2(screenX, Gdx.graphics.getHeight() - screenY);
 
         if (touchCoords.x != 0 && touchCoords.y != 0) {
-         for(BoxObject box : objects)
-         {
-             if(box.isInside(touchCoords))
-             {
-                 System.out.println("INSIDE");
-//                 objects.add(new BoxObject(new Vector2(box.startCoords.x-img.getWidth()/2,box.startCoords.y-img.getHeight()/2)));
-//                 objects.remove(box);
-             }
-         }
+          for (int i = 0; i < objects.size(); i++) {
+            BoxObject box;
+            if (objects.get(i) instanceof BoxObject) {
+              box = (BoxObject) objects.get(i);
+            } else {
+              continue;
+            }
+            if (box.isInside(touchCoords) && !box.isTouched) {
+              BoxObject newBox =
+                  new BoxObject(new Vector2(box.startCoords.x, box.startCoords.y), img,
+                      new Vector2(-box.movement.x, -box.movement.y), width, height);
+              newBox.setSpriteSize(box.sprite.getWidth() / 1.2f, box.sprite.getHeight() / 1.2f);
+              objects.add(newBox);
+
+              BoxObject newBox2 =
+                  new BoxObject(new Vector2(box.startCoords.x, box.startCoords.y), img,
+                      new Vector2(box.movement.x, box.movement.y), width, height);
+              newBox2.setSpriteSize(box.sprite.getWidth() / 1.2f, box.sprite.getHeight() / 1.2f);
+              objects.add(newBox2);
+
+              newBox.isTouched = true;
+              newBox2.isTouched = true;
+              objects.remove(i);
+            }
+          }
         }
+        return true;
+      }
+    });
+  }
 
-        if (box.endCoords.x >= width) opX = Operation.minus;
-        else if (box.startCoords.x <= 0) opX = Operation.plus;
+  @Override public void render() {
 
-        if (box.startCoords.y <= 0) opY = Operation.plus;
-        else if (box.endCoords.y >= height) opY = Operation.minus;
+    Gdx.gl.glClearColor(1, 0, 0, 1);
+    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+    batch.begin();
 
-        if (opX == Operation.plus) {
-            box.addDeltaX(delta);
-        } else
-            box.addDeltaX(-delta);
-
-        if (opY == Operation.plus)
-            box.addDeltaY(delta);
-        else
-            box.addDeltaY(-delta);
-
-        Gdx.gl.glClearColor(1, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        batch.begin();
-
-        for(BoxObject box : objects) {
-            box.sprite.draw(batch);
-//            batch.draw(box.sprite, box.startCoords.x, box.startCoords.y);
-        }
-        batch.end();
-        touchCoords.x = 0; touchCoords.y = 0;
+    for (int i = 0; i < objects.size(); i++) {
+      if (objects.get(i) instanceof BoxObject) {
+        ((BoxObject) objects.get(i)).render(batch, width, height, objects);
+      }
     }
+    batch.end();
+    touchCoords.x = 0;
+    touchCoords.y = 0;
+  }
 
-    @Override
-    public void dispose() {
-        batch.dispose();
-        img.dispose();
-    }
+  @Override public void dispose() {
+    batch.dispose();
+    img.dispose();
+  }
 }
