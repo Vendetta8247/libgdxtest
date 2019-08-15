@@ -5,15 +5,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.Box;
 
 public class MyGdxGame extends ApplicationAdapter {
   SpriteBatch batch;
@@ -29,16 +27,16 @@ public class MyGdxGame extends ApplicationAdapter {
     batch = new SpriteBatch();
     width = Gdx.graphics.getWidth();
     height = Gdx.graphics.getHeight();
-    img = new Texture("badlogic.jpg");
-    box = new BoxObject(new Vector2(0, 0), img, new Vector2(10, 10), width, height);
+    img = new Texture("pengu.png");
+    box = new BoxObject(new Rectangle(0,0,img.getWidth(), img.getHeight()), img, new Vector2(10, 10));
     box.setSpriteSize(img.getWidth(), img.getHeight());
     objects = new ArrayList<>();
     objects.add(box);
-    objects.add(new CollidableObject(new Vector2(-50, -50), new Vector2(-1, height + 50)));
-    objects.add(
-        new CollidableObject(new Vector2(-50, height + 50), new Vector2(width + 50, height +1)));
-    objects.add(new CollidableObject(new Vector2(width + 50, height + 50), new Vector2(width -1, -50)));
-    objects.add(new CollidableObject(new Vector2(width+50, -50), new Vector2(-50, - 50)));
+    objects.add(new CollidableObject(new Rectangle(-50,-50,50,height+100)));
+    objects.add(new CollidableObject(new Rectangle(-50,height,width + 50,50)));
+    objects.add(new CollidableObject(new Rectangle(width ,0,50,height+50)));
+    objects.add(new CollidableObject(new Rectangle(-50,-50,width + 100,50)));
+
     Gdx.input.setInputProcessor(new InputAdapter() {
       @Override public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
@@ -53,15 +51,17 @@ public class MyGdxGame extends ApplicationAdapter {
               continue;
             }
             if (box.isInside(touchCoords) && !box.isTouched) {
+              Rectangle newBounds1 = new Rectangle(box.bounds.x - box.bounds.getWidth()/1.2f - 1, box.bounds.y - box.bounds.getHeight()/1.2f - 1, box.bounds.getWidth()/1.2f, box.bounds.getHeight()/1.2f);
               BoxObject newBox =
-                  new BoxObject(new Vector2(box.startCoords.x, box.startCoords.y), img,
-                      new Vector2(-box.movement.x, -box.movement.y), width, height);
+                  new BoxObject(new Rectangle(newBounds1), img,
+                      new Vector2(-box.movement.x, -box.movement.y));
               newBox.setSpriteSize(box.sprite.getWidth() / 1.2f, box.sprite.getHeight() / 1.2f);
               objects.add(newBox);
 
+              Rectangle newBounds2 = new Rectangle(box.bounds.x + box.bounds.getWidth()/1.2f + 1, box.bounds.y + box.bounds.getHeight()/1.2f + 1, box.bounds.getWidth()/1.2f, box.bounds.getHeight()/1.2f);
               BoxObject newBox2 =
-                  new BoxObject(new Vector2(box.startCoords.x, box.startCoords.y), img,
-                      new Vector2(box.movement.x, box.movement.y), width, height);
+                  new BoxObject(new Rectangle(newBounds2), img,
+                      new Vector2(box.movement.x, box.movement.y));
               newBox2.setSpriteSize(box.sprite.getWidth() / 1.2f, box.sprite.getHeight() / 1.2f);
               objects.add(newBox2);
 
@@ -78,13 +78,13 @@ public class MyGdxGame extends ApplicationAdapter {
 
   @Override public void render() {
 
-    Gdx.gl.glClearColor(1, 0, 0, 1);
+    Gdx.gl.glClearColor(0.17f, 0.85f, 0.68f, 1);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     batch.begin();
 
     for (int i = 0; i < objects.size(); i++) {
       if (objects.get(i) instanceof BoxObject) {
-        ((BoxObject) objects.get(i)).render(batch, width, height, objects);
+        ((BoxObject) objects.get(i)).render(batch, objects);
       }
     }
     batch.end();

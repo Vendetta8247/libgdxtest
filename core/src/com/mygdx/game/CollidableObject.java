@@ -1,14 +1,13 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Rectangle;
 
 public class CollidableObject {
-  public Vector2 startCoords, endCoords;
+  public Rectangle bounds;
 
-  public CollidableObject(Vector2 startCoords, Vector2 endCoords)
+  public CollidableObject(Rectangle bounds)
   {
-    this.startCoords = startCoords;
-    this.endCoords = endCoords;
+    this.bounds = bounds;
   }
   public CollidableObject()
   {
